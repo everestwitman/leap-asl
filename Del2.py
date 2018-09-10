@@ -6,50 +6,45 @@ import random
 import globalVariables as gv
 
 controller = Controller()
-# ion()
-# show()
-# # draw a point
-# xPt = 0 
-# yPt = 0
-# pt, = plot(xPt, yPt, 'ko', markersize=20)
-# # set length of axes
-# xlim(-100, 100)
-# ylim(50, 450)
+lines = []
 
 matplotlib.interactive(True)
 fig = plt.figure(figsize = (8, 6))
 ax = fig.add_subplot(111, projection='3d')
+ax.set_xlim(-1000, 1000)
+ax.set_ylim(-1000, 1000)
+ax.set_zlim(0, 1000)
+ax.view_init(azim=90)
 
 while True:
     frame = controller.frame()
+    while (lines): 
+        ln = lines.pop()
+        ln.pop(0).remove()
+        del ln
+        ln = []
+        
+    # if at least one hand is in the frame 
     if (frame.hands):
-        print frame
+        hand = frame.hands[0]
+        for i in range(0, 5): 
+            finger = hand.fingers[i]
+            for j in range(0, 4): 
+                bone = finger.bone(j)
+                boneBase = bone.prev_joint
+                boneTip = bone.next_joint
+                print boneBase
+                print boneTip
+
+                xBase = boneBase[0]
+                yBase = boneBase[1]
+                zBase = boneBase[2]
+                xTip = boneTip[0]
+                yTip = boneTip[1]
+                zTip = boneTip[2]
+                
+                lines.append(ax.plot([-xBase, -xTip], [zBase, zTip], [yBase, yTip], 'r'))
+                
     plt.pause(0.00001)
-    # # if at least one hand is in the frame 
-    # if (len(frame.hands)):
-    #     hand = frame.hands[0]
-    #     fingers = hand.fingers
-    #     indexFinger = fingers.finger_type(Finger.TYPE_INDEX)[0]
-    #     distalPhalanx = indexFinger.bone(Bone.TYPE_DISTAL)
-    #     distalPhalanxPosition = distalPhalanx.next_joint
-    #     print distalPhalanxPosition
-    # 
-    #     x = distalPhalanxPosition[0]
-    #     if (x < gv.xMin):
-    #         gv.xMin = x 
-    #     if (x > gv.xMin): 
-    #         gv.xMax = x
-    #     y = distalPhalanxPosition[1]
-    #     if (y < gv.yMin):
-    #         gv.yMin = y 
-    #     if (y > gv.yMin): 
-    #         gv.yMay = y
-    # 
-    #     print(x)
-    #     print(y)
-    # 
-    #     pt.set_xdata(x)
-    #     pt.set_ydata(y)
-    # 
-    #     pause(0.00001)
+    
     
