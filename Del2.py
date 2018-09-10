@@ -11,13 +11,15 @@ lines = []
 matplotlib.interactive(True)
 fig = plt.figure(figsize = (8, 6))
 ax = fig.add_subplot(111, projection='3d')
-ax.set_xlim(-1000, 1000)
-ax.set_ylim(-1000, 1000)
-ax.set_zlim(0, 1000)
+ax.set_xlim(-300, 300)
+ax.set_ylim(-50, 250)
+ax.set_zlim(50, 500)
 ax.view_init(azim=90)
 
 while True:
     frame = controller.frame()
+    
+    
     while (lines): 
         ln = lines.pop()
         ln.pop(0).remove()
@@ -33,7 +35,6 @@ while True:
                 bone = finger.bone(j)
                 boneBase = bone.prev_joint
                 boneTip = bone.next_joint
-                print boneBase
                 print boneTip
 
                 xBase = boneBase[0]
