@@ -18,38 +18,50 @@ class Deliverable:
         self.ax.set_ylim(-50, 250)
         self.ax.set_zlim(50, 500)
         self.ax.view_init(azim=90)
+    
+    def HandleBone(self, i, j):
+        self.bone = self.finger.bone(j)
+        boneBase = self.bone.prev_joint
+        boneTip = self.bone.next_joint
+        print boneTip
+
+        xBase = boneBase[0]
+        yBase = boneBase[1]
+        zBase = boneBase[2]
+        xTip = boneTip[0]
+        yTip = boneTip[1]
+        zTip = boneTip[2]
+        
+        self.lines.append(self.ax.plot([-xBase, -xTip], [zBase, zTip], [yBase, yTip], 'r'))
+        
+    def HandleFinger(self, i):
+        self.finger = self.hand.fingers[i]
+        for j in range(0, 4): 
+            self.HandleBone(i, j)
+            
+    def HandleHands(self):
+        self.hand = self.frame.hands[0]
+        for i in range(0,5): 
+            self.HandleFinger(i)
+        plt.pause(0.00001)
+        
+        # delete drawn lines 
+        while (self.lines): 
+            ln = self.lines.pop()
+            ln.pop(0).remove()
+            del ln
+            ln = []
+        
+    def RunOnce(self): 
+        self.frame = self.controller.frame()
+        
+        # if at least one hand is in the frame 
+        if (self.frame.hands):
+            self.HandleHands()
         
     def RunForever(self):
         while True:
-            frame = self.controller.frame()
-            
-            while (self.lines): 
-                ln = self.lines.pop()
-                ln.pop(0).remove()
-                del ln
-                ln = []
-                
-            # if at least one hand is in the frame 
-            if (frame.hands):
-                hand = frame.hands[0]
-                for i in range(0, 5): 
-                    finger = hand.fingers[i]
-                    for j in range(0, 4): 
-                        bone = finger.bone(j)
-                        boneBase = bone.prev_joint
-                        boneTip = bone.next_joint
-                        print boneTip
-
-                        xBase = boneBase[0]
-                        yBase = boneBase[1]
-                        zBase = boneBase[2]
-                        xTip = boneTip[0]
-                        yTip = boneTip[1]
-                        zTip = boneTip[2]
-                        
-                        self.lines.append(self.ax.plot([-xBase, -xTip], [zBase, zTip], [yBase, yTip], 'r'))
-                        
-            plt.pause(0.00001)
+            self.RunOnce()
     
 deliverable = Deliverable()
 deliverable.RunForever()
