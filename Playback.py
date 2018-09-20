@@ -34,12 +34,9 @@ class Reader:
                 xTip = gestureData[i, j, 3]
                 yTip = gestureData[i, j, 4]
                 zTip = gestureData[i, j, 5]
-                
-                print xBase, yBase, zBase, xTip, yTip, zTip
-                print self.lines
+
                 self.lines.append(self.ax.plot([-xBase, -xTip], [zBase, zTip], [yBase, yTip], 'b'))
-                # self.lines.append(self.ax.plot([-xBase,-xTip],[zBase,zTip],[yBase,yTip],'b'))
-                plt.pause(0.5)
+        plt.pause(0.5)
                 
         # delete drawn lines 
         while (self.lines): 
@@ -49,7 +46,7 @@ class Reader:
             ln = []
         
     def PrintData(self):    
-        for i in range(0, self.numberOfGesturesSaved + 1):
+        for i in range(0, self.numberOfGesturesSaved+1):
             self.PrintGesture(i)
             
     def RunForever(self): 

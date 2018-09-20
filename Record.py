@@ -49,9 +49,9 @@ class Deliverable:
             self.gestureData[i, j, 0] = xBase
             self.gestureData[i, j, 1] = yBase
             self.gestureData[i, j, 2] = zBase
-            self.gestureData[i, j, 3] = xBase
-            self.gestureData[i, j, 4] = yBase
-            self.gestureData[i, j, 5] = zBase
+            self.gestureData[i, j, 3] = xTip
+            self.gestureData[i, j, 4] = yTip
+            self.gestureData[i, j, 5] = zTip
         
     def HandleFinger(self, i):
         self.finger = self.hand.fingers[i]
