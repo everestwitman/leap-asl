@@ -5,7 +5,6 @@ import matplotlib
 import random 
 import globalVariables as gv
 import numpy as np
-import pickle
 
 class Deliverable: 
     def __init__(self):
@@ -23,13 +22,8 @@ class Deliverable:
         self.previousNumberOfHands = 0 
         self.currentNumberOfHands = 0
         
-        self.numberOfGestures = 1000
-        self.gestureIndex = 0
-        
-        self.gestureData = np.zeros((5, 4, 6, self.numberOfGestures), dtype='f')
+        self.gestureData = np.zeros((5, 4, 6), dtype='f')
         self.numberOfGesturesSaved = 0
-        
-        
     
     def RecordingIsEnding(self):
         return (self.previousNumberOfHands==2) & (self.currentNumberOfHands==1)
@@ -51,15 +45,13 @@ class Deliverable:
         else: 
             self.lines.append(self.ax.plot([-xBase, -xTip], [zBase, zTip], [yBase, yTip], 'r', color = 'r'))
         
-        
-        if (self.currentNumberOfHands == 2):
-            self.gestureData[i, j, 0, self.gestureIndex] = xBase
-            self.gestureData[i, j, 1, self.gestureIndex] = yBase
-            self.gestureData[i, j, 2, self.gestureIndex] = zBase
-            self.gestureData[i, j, 3, self.gestureIndex] = xTip
-            self.gestureData[i, j, 4, self.gestureIndex] = yTip
-            self.gestureData[i, j, 5, self.gestureIndex] = zTip
-            
+        if (self.RecordingIsEnding()):
+            self.gestureData[i, j, 0] = xBase
+            self.gestureData[i, j, 1] = yBase
+            self.gestureData[i, j, 2] = zBase
+            self.gestureData[i, j, 3] = xTip
+            self.gestureData[i, j, 4] = yTip
+            self.gestureData[i, j, 5] = zTip
         
     def HandleFinger(self, i):
         self.finger = self.hand.fingers[i]
@@ -67,9 +59,16 @@ class Deliverable:
             self.HandleBone(i, j)
             
     def SaveGesture(self):
-        fileName = 'userData/gesture.dat'
+        fileName = 'userData/gesture' + str(self.numberOfGesturesSaved) + '.dat'
         f = open(fileName, 'w')
-        pickle.dump(self.gestureData, f)
+        np.save(f, self.gestureData)
+        f.close()
+        
+        self.numberOfGesturesSaved = self.numberOfGesturesSaved + 1
+        
+        fileName = 'userData/numOfGestures.dat'
+        f = open(fileName, 'w')
+        f.write(str(self.numberOfGesturesSaved))
         f.close()
             
     def HandleHands(self):
@@ -89,18 +88,9 @@ class Deliverable:
             del ln
             ln = []
         
-        # if (self.RecordingIsEnding()):
-        #     # print self.gestureData[:,:,:]
-
-        
-        if (self.currentNumberOfHands == 2): 
-            print 'gesture'  + str(self.gestureIndex) + 'stored.'
-            self.gestureIndex = self.gestureIndex + 1
-            if (self.gestureIndex == self.numberOfGestures): 
-                self.SaveGesture()
-                # print self.gestureData[:,:,:, 0]
-                # print self.gestureData[:,:,:, 99]
-                sys.exit(0) 
+        if (self.RecordingIsEnding()):
+            print self.gestureData[:,:,:]
+            self.SaveGesture()
         
     def RunOnce(self): 
         self.frame = self.controller.frame()
