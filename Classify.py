@@ -59,9 +59,9 @@ def CenterData(X):
     X[:, :, 1, :] = allYCoordinates - meanYValue
     
     # Center Z coordinates
-    allYCoordinates = X[:, :, 2, :]
-    meanZValue = allYCoordinates.mean()
-    X[:, :, 2, :] = allYCoordinates - meanZValue
+    allZCoordinates = X[:, :, 2, :]
+    meanZValue = allZCoordinates.mean()
+    X[:, :, 2, :] = allZCoordinates - meanZValue
     
     return X
 
@@ -89,6 +89,7 @@ testy = reshapedTestData[1]
 print testX
 print testy
 
+print trainX.shape
 clf = neighbors.KNeighborsClassifier(15)
 clf.fit(trainX, trainy)
 
@@ -98,3 +99,5 @@ for i in range(1, 2000):
     if prediction == testy[i]:
         numCorrect += 1
 print (numCorrect / 2000.0) * 100
+
+pickle.dump(clf, open('userData/classifier.p', 'wb'))
