@@ -2,33 +2,46 @@ import numpy as np
 import pickle
 from sklearn import neighbors, datasets
 
-# Read data sets from file
-f = open('userData/train4.dat', 'rb')
-train4 = pickle.load(f)
+# Read data sets from userData/
+train0 = pickle.load(open('userData/train0.dat', 'rb'))
+test0 = pickle.load(open('userData/test0.dat', 'rb'))
 
-f = open('userData/train5.dat', 'rb')
-train5 = pickle.load(f)
+train1 = pickle.load(open('userData/train1.dat', 'rb'))
+test1 = pickle.load(open('userData/test1.dat', 'rb'))
 
-f = open('userData/train6.dat', 'rb')
-train6 = pickle.load(f)
+train2 = pickle.load(open('userData/train2.dat', 'rb'))
+# test2 = pickle.load(open('userData/test2.dat', 'rb'))
+test2 = np.load(open('userData/test2.dat', 'r'))
 
-f = open('userData/test4.dat', 'rb')
-test4 = pickle.load(f)
+train3 = pickle.load(open('userData/train3.dat', 'rb'))
+# test3 = pickle.load(open('userData/test3.dat', 'rb'))
+test3 = np.load(open('userData/test3.dat', 'r'))
 
-f = open('userData/test5.dat', 'rb')
-test5 = pickle.load(f)
+train4 = pickle.load(open('userData/train4.dat', 'rb'))
+test4 = pickle.load(open('userData/test4.dat', 'rb'))
 
-f = open('userData/test6.dat', 'rb')
-test6 = pickle.load(f)
+train5 = pickle.load(open('userData/train5.dat', 'rb'))
+test5 = pickle.load(open('userData/test5.dat', 'rb'))
 
-print train4.shape
-print train5.shape
-print test4.shape
-print test5.shape
+train6 = pickle.load(open('userData/train6.dat', 'rb'))
+test6 = pickle.load(open('userData/test6.dat', 'rb'))
 
-def ReshapeData(set1, set2, set3):
-    X = np.zeros((3000, 5*4*6), dtype='f')
-    y = [] * 3000
+# train7 = pickle.load(open('userData/train7.dat', 'rb'))
+train7 = np.load(open('userData/train2.dat', 'r'))
+# test7 = pickle.load(open('userData/test7.dat', 'rb'))
+test7 = np.load(open('userData/test7.dat', 'r'))
+
+# train8 = pickle.load(open('userData/train8.dat', 'rb'))
+train8 = np.load(open('userData/train8.dat', 'r'))
+# test8 = pickle.load(open('userData/test8.dat', 'rb'))
+test8 = np.load(open('userData/test8.dat', 'r'))
+
+train9 = pickle.load(open('userData/train9.dat', 'rb'))
+test9 = pickle.load(open('userData/test9.dat', 'rb'))
+
+def ReshapeData(set1, set2, set3, set4, set5, set6):
+    X = np.zeros((6000, 5*2*3), dtype='f')
+    y = [] * 6000
     for i in range(0, 1000):
         n = 0
         for j in range(0, 5):
@@ -36,12 +49,21 @@ def ReshapeData(set1, set2, set3):
                 for m in range(0, 3):
                     X[i, n] = set1[j, k, m, i]
                     X[i + 1000, n] = set2[j, k, m, i]   
-                    X[i + 2000, n] = set3[j, k, m, i]      
+                    X[i + 2000, n] = set3[j, k, m, i]  
+                    X[i + 3000, n] = set4[j, k, m, i]
+                    X[i + 4000, n] = set5[j, k, m, i]    
+                    X[i + 5000, n] = set5[j, k, m, i]      
                     n = n + 1
-                    
+    
+    # for i in range(0, 9):   
+    #     y[i * 1000 : i * 1000 + 999] = [i] * 1000;   
+         
     y[0 : 999] = [4] * 1000;
     y[1000 : 1999] = [5] * 1000;
     y[2000 : 2999] = [6] * 1000;
+    y[3000 : 3999] = [0] * 1000;
+    y[4000 : 4999] = [1] * 1000;
+    y[5000 : 5999] = [9] * 1000;
     
     return X, y
 
@@ -89,13 +111,13 @@ test5 = CenterData(test5)
 train6 = CenterData(train6)
 test6 = CenterData(test6)
 
-reshapedTrainData = ReshapeData(train4, train5, train6) 
+reshapedTrainData = ReshapeData(train4, train5, train6, train0, train1, train9) 
 trainX = reshapedTrainData[0]
 trainy = reshapedTrainData[1]
 print trainX
 print trainy
 
-reshapedTestData = ReshapeData(test4, test5, test6)
+reshapedTestData = ReshapeData(test4, test5, test6, test0, test1, train9)
 testX = reshapedTestData[0]
 testy = reshapedTestData[1]
 print testX

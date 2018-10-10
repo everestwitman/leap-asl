@@ -81,7 +81,7 @@ while True:
         
         print testData.shape
         print clf
-        # testData = CenterData(testData)
+        testData = CenterData(testData)
         predictedClass = clf.predict(testData)
         print predictedClass
     plt.pause(0.00001)
