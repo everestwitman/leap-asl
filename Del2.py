@@ -23,7 +23,6 @@ ax.set_zlim(50, 500)
 ax.view_init(azim=90)
 
 def CenterData(X): 
-    print X
     # Center X coordinates
     allXCoordinates = X[0, ::3]
     meanXValue = allXCoordinates.mean()
@@ -78,12 +77,12 @@ while True:
                     testData[0, k + 2] = zTip
                     k = k + 3
                     
-        
-        print testData.shape
-        print clf
         testData = CenterData(testData)
+        print testData.shape
         predictedClass = clf.predict(testData)
         print predictedClass
+    
+
     plt.pause(0.00001)
     
     
