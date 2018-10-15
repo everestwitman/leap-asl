@@ -6,19 +6,21 @@ from sklearn import neighbors, datasets
 train0 = pickle.load(open('userData/train0.dat', 'rb'))
 test0 = pickle.load(open('userData/test0.dat', 'rb'))
 
-train1 = pickle.load(open('userData/train1.dat', 'rb'))
-test1 = pickle.load(open('userData/test1.dat', 'rb'))
+# train1 = pickle.load(open('userData/train1 (3).dat', 'rb'))
+train1 = np.load(open('userData/train1 (3).dat', 'r'))
+# test1 = pickle.load(open('userData/test1 (3).dat', 'rb'))
+test1 = np.load(open('userData/test1 (3).dat', 'r'))
 
-train2 = pickle.load(open('userData/train2.dat', 'rb'))
+train2 = pickle.load(open('userData/train2 (3).dat', 'rb'))
 # test2 = pickle.load(open('userData/test2.dat', 'rb'))
-test2 = np.load(open('userData/test2.dat', 'r'))
+test2 = np.load(open('userData/test2 (3).dat', 'r'))
 
-train3 = pickle.load(open('userData/train3.dat', 'rb'))
+train3 = pickle.load(open('userData/train3 (2).dat', 'rb'))
 # test3 = pickle.load(open('userData/test3.dat', 'rb'))
-test3 = np.load(open('userData/test3.dat', 'r'))
+test3 = np.load(open('userData/test3 (2).dat', 'r'))
 
-train4 = pickle.load(open('userData/train4.dat', 'rb'))
-test4 = pickle.load(open('userData/test4.dat', 'rb'))
+train4 = pickle.load(open('userData/train4 (5).dat', 'rb'))
+test4 = pickle.load(open('userData/test4 (5).dat', 'rb'))
 
 train5 = pickle.load(open('userData/train5.dat', 'rb'))
 test5 = pickle.load(open('userData/test5.dat', 'rb'))
@@ -27,17 +29,17 @@ train6 = pickle.load(open('userData/train6.dat', 'rb'))
 test6 = pickle.load(open('userData/test6.dat', 'rb'))
 
 # train7 = pickle.load(open('userData/train7.dat', 'rb'))
-train7 = np.load(open('userData/train2.dat', 'r'))
+train7 = np.load(open('userData/train7 (2).dat', 'r'))
 # test7 = pickle.load(open('userData/test7.dat', 'rb'))
-test7 = np.load(open('userData/test7.dat', 'r'))
+test7 = np.load(open('userData/test7 (2).dat', 'r'))
 
 # train8 = pickle.load(open('userData/train8.dat', 'rb'))
 train8 = np.load(open('userData/train8.dat', 'r'))
 # test8 = pickle.load(open('userData/test8.dat', 'rb'))
 test8 = np.load(open('userData/test8.dat', 'r'))
 
-train9 = pickle.load(open('userData/train9.dat', 'rb'))
-test9 = pickle.load(open('userData/test9.dat', 'rb'))
+train9 = pickle.load(open('userData/train9 (4).dat', 'rb'))
+test9 = pickle.load(open('userData/test9 (4).dat', 'rb'))
 
 def ReshapeData(set0, set1, set2, set3, set4, set5, set6, set7, set8, set9):
     X = np.zeros((10000, 5*2*3), dtype='f')

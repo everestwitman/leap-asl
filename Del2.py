@@ -78,7 +78,6 @@ while True:
                     k = k + 3
                     
         testData = CenterData(testData)
-        print testData.shape
         predictedClass = clf.predict(testData)
         print predictedClass
     
