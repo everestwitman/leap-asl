@@ -55,6 +55,7 @@ def CenterData(X):
     return X
 
 def DrawImageToHelpUserPutTheirHandOverTheDevice():
+    global ax1
     ax1 = fig.add_subplot(122)
     ax1.imshow(image)
     ax1.axis('off') # clear x- and y-axes
@@ -72,11 +73,13 @@ def HandleState0():
         
     print "Waiting for hand"
     
-    # DrawImageToHelpUserPutTheirHandOverTheDevice()
+    DrawImageToHelpUserPutTheirHandOverTheDevice()
     
 
 def HandleState1():
-    global programState
+    
+    global programState, ax1
+    fig.delaxes(ax1)
     if HandCentered(): 
         programState = 2
         
