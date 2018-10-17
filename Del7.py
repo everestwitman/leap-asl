@@ -15,8 +15,12 @@ testData = np.zeros((1, 30), dtype='f')
 controller = Controller()
 lines = []
 
+def NewCurrentNumber(): 
+    return (random.randint(0, 9))
+
 programState = 0
-currentNumber = random.randint(0,9)
+currentNumber = NewCurrentNumber()
+correctSignFrames = 0
 
 matplotlib.interactive(True)
 fig = plt.figure(figsize = (8, 6))
@@ -67,7 +71,8 @@ def HandleState0():
         programState = 1
         
     print "Waiting for hand"
-    DrawImageToHelpUserPutTheirHandOverTheDevice()
+    
+    # DrawImageToHelpUserPutTheirHandOverTheDevice()
     
 
 def HandleState1():
@@ -79,13 +84,22 @@ def HandleState1():
     
 def HandleState2():
     print "Hand is present and centered"
-    global currentNumber, programState
+    global currentNumber, programState, correctSignFrames
+    
     if predictedClass == currentNumber: 
-        NewCurrentNumber = 0
-        programState = 3
+        correctSignFrames += 1
+        if correctSignFrames >= 10: 
+            currentNumber = NewCurrentNumber()
+            programState = 3    
+    else: 
+        correctSignFrames = 0
+        
                 
 def HandleState3():
+    global programState
     print "Correct!"
+    
+    programState = 0
 
 while True:
     frame = controller.frame()
@@ -125,12 +139,14 @@ while True:
                     
         testData = CenterData(testData)
         predictedClass = clf.predict(testData)
-        print predictedClass
+        
+        print "predictedClass: " + str(predictedClass)
         
     plt.pause(0.00001)
     
-    print programState
-    print currentNumber
+    print ("State: " + str(programState))
+    print ("currentNumber: " + str(currentNumber))
+    
     if (programState == 0): # waiting for hand
         HandleState0()
         
@@ -139,6 +155,7 @@ while True:
          
     elif (programState == 2): # hand is present and centered
         HandleState2()
+        
     elif (programState == 3): # user correctly signed current number
         HandleState3()
     
