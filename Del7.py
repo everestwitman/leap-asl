@@ -31,11 +31,6 @@ ax.set_ylim(-50, 250)
 ax.set_zlim(50, 500)
 ax.view_init(azim=90)
 
-# ax2 = fig.add_subplot(222)
-# ax2.axis('off')
-handWaveImage = cbook.get_sample_data('ada.png')
-image = plt.imread(handWaveImage)
-
 def CenterData(X): 
     # Center X coordinates
     allXCoordinates = X[0, ::3]
@@ -54,17 +49,51 @@ def CenterData(X):
 
     return X
 
+def DrawCurrentNumber():
+    global currentNumber, ax2
+    
+    # plt.text(50, 50, currentNumber, fontdict = None, withdash = False)
+    image = "images/" + str(currentNumber) + "_sign.png"
+    image = plt.imread(image)
+    
+    ax2 = fig.add_subplot(144)
+    ax2.imshow(image)
+    ax2.axis('off') # clear x- and y-axes
+    
 def DrawImageToHelpUserPutTheirHandOverTheDevice():
-    global ax1
+    global ax1, currentNumber
+    
+    handWaveImage = 'images/handWaveImage.png'
+    image = plt.imread(handWaveImage)
+    
     ax1 = fig.add_subplot(122)
     ax1.imshow(image)
     ax1.axis('off') # clear x- and y-axes
-    
+    # a = plt.text(50, 50, currentNumber, fontsize=12, bbox=dict(alpha=0.1))
+    # DrawCurrentNumber()
+
 def HandOverDevice():
     return (len(frame.hands) > 0)
 
 def HandCentered():
+    global hand
+    # if hand.sphere_center[0] < 100:
+    #     print "not center"
+    #     return False
+    # elif hand.sphere_center[0] > -100:
+    #     print "not center"
+    #     return False
+    # elif hand.sphere_center[1] < 100:
+    #     print "not center"
+    #     return False
+    # elif hand.sphere_center[1] > -100:
+    #     print "not center"
+    #     return False 
+    # else: 
+    #     return True 
     return True
+    
+    
 
 def HandleState0(): 
     global programState
@@ -75,11 +104,10 @@ def HandleState0():
     
     DrawImageToHelpUserPutTheirHandOverTheDevice()
     
-
 def HandleState1():
-    
     global programState, ax1
     fig.delaxes(ax1)
+    fig.delaxes(ax2)
     if HandCentered(): 
         programState = 2
         
@@ -88,6 +116,7 @@ def HandleState1():
 def HandleState2():
     print "Hand is present and centered"
     global currentNumber, programState, correctSignFrames
+    
     
     if predictedClass == currentNumber: 
         correctSignFrames += 1
@@ -144,6 +173,8 @@ while True:
         predictedClass = clf.predict(testData)
         
         print "predictedClass: " + str(predictedClass)
+        # plt.text(50, 50, currentNumber, fontsize=12)
+        DrawCurrentNumber()
         
     plt.pause(0.00001)
     
