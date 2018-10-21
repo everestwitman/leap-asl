@@ -31,6 +31,33 @@ ax.set_ylim(-50, 250)
 ax.set_zlim(50, 500)
 ax.view_init(azim=90)
 
+
+
+# Draw all images with visible = false
+ax2 = fig.add_subplot(144)
+ax2.axis('off') # clear x- and y-axes
+extent = (0, 1, 0, 1)
+
+handWaveImage = ax2.imshow(plt.imread("images/handWaveImage.png"), extent=extent, visible=False)
+zeroSign = ax2.imshow(plt.imread("images/0_sign.png"), extent=extent, visible=False)
+oneSign = ax2.imshow(plt.imread("images/1_sign.png"), extent=extent, visible=False)
+twoSign = ax2.imshow(plt.imread("images/2_sign.png"), extent=extent, visible=False)
+threeSign = ax2.imshow(plt.imread("images/3_sign.png"), extent=extent, visible=False)
+fourSign = ax2.imshow(plt.imread("images/4_sign.png"), extent=extent, visible=False)
+fiveSign = ax2.imshow(plt.imread("images/5_sign.png"), extent=extent, visible=False)
+sixSign = ax2.imshow(plt.imread("images/6_sign.png"), extent=extent, visible=False)
+sevenSign = ax2.imshow(plt.imread("images/7_sign.png"), extent=extent, visible=False)
+eightSign = ax2.imshow(plt.imread("images/8_sign.png"), extent=extent, visible=False)
+nineSign = ax2.imshow(plt.imread("images/9_sign.png"), extent=extent, visible=False)
+
+currentImage = handWaveImage
+
+def ChangeImage(newImg):
+    global currentImage
+    currentImage.set_visible(False)
+    newImg.set_visible(True)
+    currentImage = newImg
+
 def CenterData(X): 
     # Center X coordinates
     allXCoordinates = X[0, ::3]
@@ -52,26 +79,27 @@ def CenterData(X):
 def DrawCurrentNumber():
     global currentNumber, ax2
     
-    # plt.text(50, 50, currentNumber, fontdict = None, withdash = False)
-    image = "images/" + str(currentNumber) + "_sign.png"
-    image = plt.imread(image)
-    
-    ax2 = fig.add_subplot(144)
-    ax2.imshow(image)
-    ax2.axis('off') # clear x- and y-axes
-    
-def DrawImageToHelpUserPutTheirHandOverTheDevice():
-    global ax1, currentNumber
-    
-    handWaveImage = 'images/handWaveImage.png'
-    image = plt.imread(handWaveImage)
-    
-    ax1 = fig.add_subplot(122)
-    ax1.imshow(image)
-    ax1.axis('off') # clear x- and y-axes
-    # a = plt.text(50, 50, currentNumber, fontsize=12, bbox=dict(alpha=0.1))
-    # DrawCurrentNumber()
-
+    if currentNumber == 0: 
+        ChangeImage(zeroSign)
+    if currentNumber == 1: 
+        ChangeImage(oneSign)
+    if currentNumber == 2: 
+        ChangeImage(twoSign)
+    if currentNumber == 3: 
+        ChangeImage(threeSign)
+    if currentNumber == 4: 
+        ChangeImage(fourSign)
+    if currentNumber == 5: 
+        ChangeImage(fiveSign)
+    if currentNumber == 6: 
+        ChangeImage(sixSign)
+    if currentNumber == 7: 
+        ChangeImage(sevenSign)
+    if currentNumber == 8: 
+        ChangeImage(eightSign)
+    if currentNumber == 9: 
+        ChangeImage(nineSign)
+        
 def HandOverDevice():
     return (len(frame.hands) > 0)
 
@@ -85,7 +113,6 @@ def HandCentered():
     #     return False
     # elif hand.sphere_center[1] < 100:
     #     print "not center"
-    #     return False
     # elif hand.sphere_center[1] > -100:
     #     print "not center"
     #     return False 
@@ -93,8 +120,6 @@ def HandCentered():
     #     return True 
     return True
     
-    
-
 def HandleState0(): 
     global programState
     if HandOverDevice():
@@ -102,12 +127,11 @@ def HandleState0():
         
     print "Waiting for hand"
     
-    DrawImageToHelpUserPutTheirHandOverTheDevice()
+    ChangeImage(handWaveImage)
     
 def HandleState1():
-    global programState, ax1
-    fig.delaxes(ax1)
-    fig.delaxes(ax2)
+    global programState
+    
     if HandCentered(): 
         programState = 2
         
@@ -117,7 +141,6 @@ def HandleState2():
     print "Hand is present and centered"
     global currentNumber, programState, correctSignFrames
     
-    
     if predictedClass == currentNumber: 
         correctSignFrames += 1
         if correctSignFrames >= 10: 
@@ -125,7 +148,9 @@ def HandleState2():
             programState = 3    
     else: 
         correctSignFrames = 0
-        
+    
+    DrawCurrentNumber()
+    
                 
 def HandleState3():
     global programState
@@ -174,7 +199,7 @@ while True:
         
         print "predictedClass: " + str(predictedClass)
         # plt.text(50, 50, currentNumber, fontsize=12)
-        DrawCurrentNumber()
+        # DrawCurrentNumber()
         
     plt.pause(0.00001)
     
