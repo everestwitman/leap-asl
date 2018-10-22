@@ -8,6 +8,8 @@ import globalVariables as gv
 import pickle
 import numpy as np
 from sklearn import neighbors, datasets
+import time, math
+from threading import Timer
 
 clf = pickle.load(open('userData/classifier.p', 'rb'))
 testData = np.zeros((1, 30), dtype='f')
@@ -31,9 +33,7 @@ ax.set_ylim(-50, 250)
 ax.set_zlim(50, 500)
 ax.view_init(azim=90)
 
-
-
-# Draw all images with visible = false
+# Draw all images as invisible
 ax2 = fig.add_subplot(144)
 ax2.axis('off') # clear x- and y-axes
 extent = (0, 1, 0, 1)
@@ -49,8 +49,26 @@ sixSign = ax2.imshow(plt.imread("images/6_sign.png"), extent=extent, visible=Fal
 sevenSign = ax2.imshow(plt.imread("images/7_sign.png"), extent=extent, visible=False)
 eightSign = ax2.imshow(plt.imread("images/8_sign.png"), extent=extent, visible=False)
 nineSign = ax2.imshow(plt.imread("images/9_sign.png"), extent=extent, visible=False)
+arrowLeft = ax2.imshow(plt.imread("images/arrow_left.png"), extent=extent, visible=False)
+arrowUp = ax2.imshow(plt.imread("images/arrow_up.png"), extent=extent, visible=False)
+arrowDown = ax2.imshow(plt.imread("images/arrow_down.png"), extent=extent, visible=False)
+arrowRight = ax2.imshow(plt.imread("images/arrow_right.png"), extent=extent, visible=False)
+checkmark = ax2.imshow(plt.imread("images/checkmark.png"), extent=extent, visible=False)
 
 currentImage = handWaveImage
+
+
+# quit by pressing 'q'
+def quit(event):
+    if event.key == 'q':
+        exit()
+    return
+
+plt.connect('key_press_event', quit)
+
+def changeProgramState(state):
+    global programState
+    programState = state
 
 def ChangeImage(newImg):
     global currentImage
@@ -105,59 +123,59 @@ def HandOverDevice():
 
 def HandCentered():
     global hand
-    # if hand.sphere_center[0] < 100:
-    #     print "not center"
-    #     return False
-    # elif hand.sphere_center[0] > -100:
-    #     print "not center"
-    #     return False
-    # elif hand.sphere_center[1] < 100:
-    #     print "not center"
-    # elif hand.sphere_center[1] > -100:
-    #     print "not center"
-    #     return False 
-    # else: 
-    #     return True 
-    return True
+    if hand.sphere_center[0] > 100:
+        print "not centered"
+        ChangeImage(arrowLeft)
+        return False
+    elif hand.sphere_center[0] < -100:
+        ChangeImage(arrowRight)
+        print "not centered"
+        return False
+    elif hand.sphere_center[2] > 100:
+        ChangeImage(arrowUp)
+        print "not centered"
+        return False
+    elif hand.sphere_center[2] < -100:
+        ChangeImage(arrowDown)
+        print "not centered"
+        return False 
+    else: 
+        return True 
     
 def HandleState0(): 
     global programState
     if HandOverDevice():
-        programState = 1
+        changeProgramState(1)
         
     print "Waiting for hand"
     
     ChangeImage(handWaveImage)
     
 def HandleState1():
-    global programState
-    
     if HandCentered(): 
-        programState = 2
+        changeProgramState(2)
         
     print "Hand is present BUT NOT centered"
     
 def HandleState2():
     print "Hand is present and centered"
-    global currentNumber, programState, correctSignFrames
+    global currentNumber, correctSignFrames
     
     if predictedClass == currentNumber: 
         correctSignFrames += 1
         if correctSignFrames >= 10: 
             currentNumber = NewCurrentNumber()
-            programState = 3    
+            changeProgramState(3) 
     else: 
         correctSignFrames = 0
     
-    DrawCurrentNumber()
-    
+    DrawCurrentNumber()  
                 
 def HandleState3():
-    global programState
     print "Correct!"
+    ChangeImage(checkmark)
+    changeProgramState(1)
     
-    programState = 0
-
 while True:
     frame = controller.frame()
     
@@ -168,7 +186,7 @@ while True:
         ln = []
         
     # if at least one hand is in the frame 
-    if (len(frame.hands) > 0):
+    if (HandOverDevice()):
         hand = frame.hands[0]
         k = 0
         for i in range(0, 5): 
@@ -193,13 +211,14 @@ while True:
                     testData[0, k + 1] = yTip
                     testData[0, k + 2] = zTip
                     k = k + 3
-                    
+            
         testData = CenterData(testData)
         predictedClass = clf.predict(testData)
         
         print "predictedClass: " + str(predictedClass)
-        # plt.text(50, 50, currentNumber, fontsize=12)
-        # DrawCurrentNumber()
+        
+    else: 
+        changeProgramState(0)
         
     plt.pause(0.00001)
     
