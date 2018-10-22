@@ -8,14 +8,39 @@ import globalVariables as gv
 import pickle
 import numpy as np
 from sklearn import neighbors, datasets
-import time, math
-from threading import Timer
 
 clf = pickle.load(open('userData/classifier.p', 'rb'))
 testData = np.zeros((1, 30), dtype='f')
 
+database = pickle.load(open('userData/database.p', 'rb'))
+
+def saveDatabase():
+    global database
+    pickle.dump(database, open('userData/database.p', 'wb'))
+
+# user login 
+userName = raw_input('Please enter your name: ')
+if (userName in database): 
+    database[userName]['logins'] = database[userName]['logins'] + 1
+    print 'Welcome back, ' + userName + '.'
+else: 
+    database[userName] = {'logins': 1}
+    for i in range(0, 10):
+        signDbEntryName = "digit" + str(i) + "attempted"
+        database[userName][signDbEntryName] = 0
+    
+    print 'Welcome, ' + userName + ''
+
+print database
+saveDatabase()
+
+userRecord = database[userName]
+
 controller = Controller()
 lines = []
+
+signFrames = 0
+signFrameLimit = 20
 
 def NewCurrentNumber(): 
     return (random.randint(0, 9))
@@ -35,9 +60,12 @@ ax.view_init(azim=90)
 
 # Draw all images as invisible
 ax2 = fig.add_subplot(144)
+ax3 = fig.add_subplot(326)
 ax2.axis('off') # clear x- and y-axes
+ax3.axis('off') # clear x- and y-axes
 extent = (0, 1, 0, 1)
 
+oneNumber = ax3.imshow(plt.imread("images/zero.png"), extent=extent)
 handWaveImage = ax2.imshow(plt.imread("images/handWaveImage.png"), extent=extent, visible=False)
 zeroSign = ax2.imshow(plt.imread("images/0_sign.png"), extent=extent, visible=False)
 oneSign = ax2.imshow(plt.imread("images/1_sign.png"), extent=extent, visible=False)
@@ -175,8 +203,17 @@ def HandleState3():
     print "Correct!"
     ChangeImage(checkmark)
     changeProgramState(1)
-    
+
 while True:
+    if programState in (1,2):
+        signFrames = signFrames + 1
+        if (signFrames == signFrameLimit):
+            signDbEntryName = "digit" + str(currentNumber) + "attempted"
+            database[userName][signDbEntryName] = database[userName][signDbEntryName] + 1
+            saveDatabase()
+            currentNumber = NewCurrentNumber()
+            signFrames = 0
+        
     frame = controller.frame()
     
     while (lines): 
