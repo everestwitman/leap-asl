@@ -31,7 +31,6 @@ else:
     
     print 'Welcome, ' + userName + ''
 
-print database
 saveDatabase()
 
 userRecord = database[userName]
@@ -65,7 +64,6 @@ ax2.axis('off') # clear x- and y-axes
 ax3.axis('off') # clear x- and y-axes
 extent = (0, 1, 0, 1)
 
-oneNumber = ax3.imshow(plt.imread("images/zero.png"), extent=extent)
 handWaveImage = ax2.imshow(plt.imread("images/handWaveImage.png"), extent=extent, visible=False)
 zeroSign = ax2.imshow(plt.imread("images/0_sign.png"), extent=extent, visible=False)
 oneSign = ax2.imshow(plt.imread("images/1_sign.png"), extent=extent, visible=False)
@@ -85,8 +83,8 @@ checkmark = ax2.imshow(plt.imread("images/checkmark.png"), extent=extent, visibl
 
 currentImage = handWaveImage
 
-
 # quit by pressing 'q'
+# NOT WORKING
 def quit(event):
     if event.key == 'q':
         exit()
@@ -152,20 +150,20 @@ def HandOverDevice():
 def HandCentered():
     global hand
     if hand.sphere_center[0] > 100:
-        print "not centered"
+        # print "not centered"
         ChangeImage(arrowLeft)
         return False
     elif hand.sphere_center[0] < -100:
         ChangeImage(arrowRight)
-        print "not centered"
+        # print "not centered"
         return False
     elif hand.sphere_center[2] > 100:
         ChangeImage(arrowUp)
-        print "not centered"
+        # print "not centered"
         return False
     elif hand.sphere_center[2] < -100:
         ChangeImage(arrowDown)
-        print "not centered"
+        # print "not centered"
         return False 
     else: 
         return True 
@@ -175,7 +173,7 @@ def HandleState0():
     if HandOverDevice():
         changeProgramState(1)
         
-    print "Waiting for hand"
+    # print "Waiting for hand"
     
     ChangeImage(handWaveImage)
     
@@ -183,10 +181,10 @@ def HandleState1():
     if HandCentered(): 
         changeProgramState(2)
         
-    print "Hand is present BUT NOT centered"
+    # print "Hand is present BUT NOT centered"
     
 def HandleState2():
-    print "Hand is present and centered"
+    # print "Hand is present and centered"
     global currentNumber, correctSignFrames
     
     if predictedClass == currentNumber: 
@@ -200,20 +198,22 @@ def HandleState2():
     DrawCurrentNumber()  
                 
 def HandleState3():
-    print "Correct!"
+    # print "Correct!"
     ChangeImage(checkmark)
     changeProgramState(1)
 
 while True:
-    if programState in (1,2):
+    print database[userName]
+    if (programState in [1,2]):
         signFrames = signFrames + 1
         if (signFrames == signFrameLimit):
             signDbEntryName = "digit" + str(currentNumber) + "attempted"
+            
             database[userName][signDbEntryName] = database[userName][signDbEntryName] + 1
             saveDatabase()
             currentNumber = NewCurrentNumber()
             signFrames = 0
-        
+                
     frame = controller.frame()
     
     while (lines): 
@@ -252,15 +252,15 @@ while True:
         testData = CenterData(testData)
         predictedClass = clf.predict(testData)
         
-        print "predictedClass: " + str(predictedClass)
+        # print "predictedClass: " + str(predictedClass)
         
     else: 
         changeProgramState(0)
         
     plt.pause(0.00001)
     
-    print ("State: " + str(programState))
-    print ("currentNumber: " + str(currentNumber))
+    # print ("State: " + str(programState))
+    # print ("currentNumber: " + str(currentNumber))
     
     if (programState == 0): # waiting for hand
         HandleState0()
