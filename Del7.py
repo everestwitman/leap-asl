@@ -4,24 +4,25 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib
 import matplotlib.cbook as cbook 
 import random 
-# import globalVariables as gv
 import pickle
 import numpy as np
 from sklearn import neighbors, datasets
 
 class LeapAsl:
     def __init__(self):
+        self.database = pickle.load(open('userData/database.p', 'rb'))
+        self.UserLogin()
+        
         self.clf = pickle.load(open('userData/classifier.p', 'rb'))
         self.testData = np.zeros((1, 30), dtype='f')
 
-        self.database = pickle.load(open('userData/database.p', 'rb'))
         self.programState = 0
         self.currentNumber = self.NewCurrentNumber()
         self.correctSignFrames = 0
         self.signFrames = 0
         
         matplotlib.interactive(True)
-        self.fig = plt.figure(figsize = (8, 6))
+        self.fig = plt.figure(figsize = (12, 8))
 
         self.controller = Controller()
         self.lines = []
@@ -31,15 +32,42 @@ class LeapAsl:
         self.ax.set_ylim(-50, 250)
         self.ax.set_zlim(50, 500)
         self.ax.view_init(azim=90)
+
+        self.ax2 = self.fig.add_subplot(6,6,1)
+        self.ax2.axis('off') # clear x- and y-axes
+        self.ax3 = self.fig.add_subplot(6,6,2)
+        self.ax3.axis('off') # clear x- and y-axes
+        self.ax4 = self.fig.add_subplot(6,6,3)
+        self.ax4.axis('off') # clear x- and y-axes
+        self.ax5 = self.fig.add_subplot(6,6,4)
+        self.ax5.axis('off') # clear x- and y-axes
+        
+        self.LoadImages()
+        
+    def LoadImages(self):
+        extent = (0, 1, 0, 1)
         
         # Draw all images as invisible
-        self.ax2 = self.fig.add_subplot(144)
-        self.ax3 = self.fig.add_subplot(326)
-        self.ax2.axis('off') # clear x- and y-axes
-        self.ax3.axis('off') # clear x- and y-axes
-        extent = (0, 1, 0, 1)
-
-        self.handWaveImage = self.ax2.imshow(plt.imread("images/handWaveImage.png"), extent=extent, visible=False)
+        self.checkmark = self.ax4.imshow(plt.imread("images/checkmark.png"), extent=extent, visible=False)
+        self.cross = self.ax4.imshow(plt.imread("images/cross.png"), extent=extent, visible=False)
+        
+        self.arrowLeft = self.ax5.imshow(plt.imread("images/arrow_left.png"), extent=extent, visible=True)
+        self.arrowUp = self.ax5.imshow(plt.imread("images/arrow_up.png"), extent=extent, visible=False)
+        self.arrowDown = self.ax5.imshow(plt.imread("images/arrow_down.png"), extent=extent, visible=False)
+        self.arrowRight = self.ax5.imshow(plt.imread("images/arrow_right.png"), extent=extent, visible=False)  
+        self.handWaveImage = self.ax5.imshow(plt.imread("images/handWaveImage.png"), extent=extent, visible=False)  
+        
+        self.zeroDigit = self.ax3.imshow(plt.imread("images/zero.png"), extent=extent, visible=False)
+        self.oneDigit = self.ax3.imshow(plt.imread("images/one.png"), extent=extent, visible=False)
+        self.twoDigit = self.ax3.imshow(plt.imread("images/two.png"), extent=extent, visible=False)
+        self.threeDigit = self.ax3.imshow(plt.imread("images/three.png"), extent=extent, visible=False)
+        self.fourDigit = self.ax3.imshow(plt.imread("images/four.png"), extent=extent, visible=False)
+        self.fiveDigit = self.ax3.imshow(plt.imread("images/five.png"), extent=extent, visible=False)
+        self.sixDigit = self.ax3.imshow(plt.imread("images/six.png"), extent=extent, visible=False)
+        self.sevenDigit = self.ax3.imshow(plt.imread("images/seven.png"), extent=extent, visible=False)
+        self.eightDigit = self.ax3.imshow(plt.imread("images/eight.png"), extent=extent, visible=False)
+        self.nineDigit = self.ax3.imshow(plt.imread("images/nine.png"), extent=extent, visible=False)
+        
         self.zeroSign = self.ax2.imshow(plt.imread("images/0_sign.png"), extent=extent, visible=False)
         self.oneSign = self.ax2.imshow(plt.imread("images/1_sign.png"), extent=extent, visible=False)
         self.twoSign = self.ax2.imshow(plt.imread("images/2_sign.png"), extent=extent, visible=False)
@@ -50,16 +78,11 @@ class LeapAsl:
         self.sevenSign = self.ax2.imshow(plt.imread("images/7_sign.png"), extent=extent, visible=False)
         self.eightSign = self.ax2.imshow(plt.imread("images/8_sign.png"), extent=extent, visible=False)
         self.nineSign = self.ax2.imshow(plt.imread("images/9_sign.png"), extent=extent, visible=False)
-        self.arrowLeft = self.ax2.imshow(plt.imread("images/arrow_left.png"), extent=extent, visible=False)
-        self.arrowUp = self.ax2.imshow(plt.imread("images/arrow_up.png"), extent=extent, visible=False)
-        self.arrowDown = self.ax2.imshow(plt.imread("images/arrow_down.png"), extent=extent, visible=False)
-        self.arrowRight = self.ax2.imshow(plt.imread("images/arrow_right.png"), extent=extent, visible=False)
-        self.checkmark = self.ax2.imshow(plt.imread("images/checkmark.png"), extent=extent, visible=False)
-
-        self.currentImage = self.handWaveImage
-        
-        self.UserLogin()
     
+        self.currentImageAx2 = self.zeroSign
+        self.currentImageAx3 = self.zeroDigit
+        self.currentImageAx4 = self.handWaveImage
+        
     def UserLogin(self): 
         # user login 
         self.userName = raw_input('Please enter your name: ')
@@ -70,25 +93,50 @@ class LeapAsl:
             self.database[self.userName] = {'logins': 1}
             for i in range(0, 10):
                 self.database[self.userName]["digit" + str(i) + "attempted"] = 0
-                self.database[self.userName]["digit" + str(i) + "answers"] = [0, 0, 0, 0, 0, 0] 
+                self.database[self.userName]["digit" + str(i) + "answers"] = []
         
             print 'Welcome, ' + self.userName + ''
         self.userRecord = self.database[self.userName]
-        self.saveDatabase()
-    def saveDatabase(self):
+        self.SaveDatabase()
+        
+    def SaveDatabase(self):
         pickle.dump(self.database, open('userData/database.p', 'wb'))
 
     def NewCurrentNumber(self): 
-        return (random.randint(0, 9))
+        # By ratio right for digit, min one
+        # add spaced repetition?
+        
+        digitDistribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for i in range(10):
+            digitDistribution[i] = 5 - (self.CorrectLastFiveAttempts(i) - 1)
+        print digitDistribution
+        
+        digitDistributionFlattened = []
+        for i in range(len(digitDistribution)):
+            for j in range(digitDistribution[i]):
+                digitDistributionFlattened.append(i)
+        print digitDistributionFlattened
+        
+        return random.choice(digitDistributionFlattened)
 
-    def changeProgramState(self, newState):
+    def ChangeProgramState(self, newState):
         self.programState = newState
 
-    def ChangeImage(self, newImg):
-        self.currentImage.set_visible(False)
+    def ChangeImageAx2(self, newImg):
+        self.currentImageAx2.set_visible(False)
         newImg.set_visible(True)
-        self.currentImage = newImg
+        self.currentImageAx2 = newImg
 
+    def ChangeImageAx3(self, newImg):
+        self.currentImageAx3.set_visible(False)
+        newImg.set_visible(True)
+        self.currentImageAx3 = newImg
+    
+    def ChangeImageAx4(self, newImg):
+        self.currentImageAx4.set_visible(False)
+        newImg.set_visible(True)
+        self.currentImageAx4 = newImg
+    
     def CenterData(self, X): 
         # Center X coordinates
         allXCoordinates = X[0, ::3]
@@ -106,28 +154,70 @@ class LeapAsl:
         X[0, 2::3] = allZCoordinates - meanZValue
 
         return X
+    
+    def DisplaySign(self, digit):
+        return (self.CorrectLastFiveAttempts(digit) < 1)
 
     def DrawCurrentNumber(self):
         if self.currentNumber == 0: 
-            self.ChangeImage(self.zeroSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.zeroSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
+            self.ChangeImageAx3(self.zeroDigit)
         if self.currentNumber == 1: 
-            self.ChangeImage(self.oneSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.oneSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
+            self.ChangeImageAx3(self.oneDigit)
         if self.currentNumber == 2: 
-            self.ChangeImage(self.twoSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.twoSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
         if self.currentNumber == 3: 
-            self.ChangeImage(self.threeSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.threeSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
+            self.ChangeImageAx3(self.threeDigit)
         if self.currentNumber == 4: 
-            self.ChangeImage(self.fourSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.fourSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
+            self.ChangeImageAx3(self.fourDigit)
         if self.currentNumber == 5: 
-            self.ChangeImage(self.fiveSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.fiveSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
+            self.ChangeImageAx3(self.fiveDigit)
         if self.currentNumber == 6: 
-            self.ChangeImage(self.sixSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.sixSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
+            self.ChangeImageAx3(self.sixDigit)
         if self.currentNumber == 7: 
-            self.ChangeImage(self.sevenSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.sevenSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
+            self.ChangeImageAx3(self.sevenDigit)
         if self.currentNumber == 8: 
-            self.ChangeImage(self.eightSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.eightSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
+            self.ChangeImageAx3(self.eightDigit)
         if self.currentNumber == 9: 
-            self.ChangeImage(self.nineSign)
+            if self.DisplaySign(self.currentNumber): 
+                self.ChangeImageAx2(self.nineSign)
+            else: 
+                self.currentImageAx2.set_visible(False)
+            self.ChangeImageAx3(self.nineDigit)
             
     def HandOverDevice(self):
         return (len(self.frame.hands) > 0)
@@ -135,18 +225,18 @@ class LeapAsl:
     def HandCentered(self):
         if self.hand.sphere_center[0] > 100:
             # print "not centered"
-            self.ChangeImage(self.arrowLeft)
+            self.ChangeImageAx2(self.arrowLeft)
             return False
         elif self.hand.sphere_center[0] < -100:
-            self.ChangeImage(self.arrowRight)
+            self.ChangeImageAx2(self.arrowRight)
             # print "not centered"
             return False
         elif self.hand.sphere_center[2] > 100:
-            self.ChangeImage(self.arrowUp)
+            self.ChangeImageAx2(self.arrowUp)
             # print "not centered"
             return False
         elif self.hand.sphere_center[2] < -100:
-            self.ChangeImage(self.arrowDown)
+            self.ChangeImageAx2(self.arrowDown)
             # print "not centered"
             return False 
         else: 
@@ -154,15 +244,16 @@ class LeapAsl:
         
     def HandleState0(self): 
         if self.HandOverDevice():
-            self.changeProgramState(1)
+            self.ChangeProgramState(1)
             
         # print "Waiting for hand"
         
-        self.ChangeImage(self.handWaveImage)
+        self.ChangeImageAx2(self.handWaveImage)
+        
         
     def HandleState1(self):
         if self.HandCentered(): 
-            self.changeProgramState(2)
+            self.ChangeProgramState(2)
             
         # print "Hand is present BUT NOT centered"
         
@@ -174,9 +265,9 @@ class LeapAsl:
         if self.predictedClass == self.currentNumber: 
             self.correctSignFrames += 1
             if self.correctSignFrames >= 10: 
-                self.currentNumber = NewCurrentNumber()
-                changeProgramState(3) 
-                signAnswersDbEntryName = "digit" + str(currentNumber) + "answers"
+                self.currentNumber = self.NewCurrentNumber()
+                self.ChangeProgramState(3) 
+                signAnswersDbEntryName = "digit" + str(self.currentNumber) + "answers"
                 self.database[self.userName][signAnswersDbEntryName].append(1) # signed digit correctly
         else: 
             self.correctSignFrames = 0
@@ -185,30 +276,47 @@ class LeapAsl:
                     
     def HandleState3(self):
         # print "Correct!"
-        self.ChangeImage(self.checkmark)
-        self.changeProgramState(1)
+        self.ChangeImageAx4(self.checkmark)
+        # self.currentImageAx3.set_visible(False)
         
-    def SignFrameLimit(self, digit):
-        correctInLastFiveAttempts = 0 
-        for x in self.database[self.userName]["digit" + str(digit) + "answers"][-5:]: # signed digit correctly
-            if x == 1: 
-                correctInLastFiveAttempts += 1
-                
-        if correctInLastFiveAttempts == 0:        
-            return 20
+        self.ChangeProgramState(1)
+        
+    def CorrectLastFiveAttempts(self, digit):
+        correctLastFiveAttempts = 0 
+        attempts = self.database[self.userName]["digit" + str(digit) + "answers"]
+        if len(attempts) > 5:
+            for x in attempts[-5:]: 
+                if x == 1: 
+                    correctLastFiveAttempts += 1
         else: 
-            return 20
+            for x in attempts:
+                if x == 1: 
+                    correctLastFiveAttempts += 1
+        return correctLastFiveAttempts
+                
+    def SignFrameLimit(self, digit):
+        correctLastFiveAttempts = self.CorrectLastFiveAttempts(digit)
+        if correctLastFiveAttempts != 0:
+            return (100 - 10 * correctLastFiveAttempts)  
+        else: 
+            return 100 
+        
         
     def CycleSigns(self):
         print self.database[self.userName]
         signFrameLimit = self.SignFrameLimit(self.currentNumber)
         self.signFrames = self.signFrames + 1
+        
         if (self.signFrames == signFrameLimit):
             signDbEntryName = "digit" + str(self.currentNumber) + "attempted"
             self.database[self.userName][signDbEntryName] = self.database[self.userName][signDbEntryName] + 1
             self.database[self.userName]["digit" + str(self.currentNumber) + "answers"].append(0) # failed to sign correctly
             
-            self.saveDatabase()
+            self.SaveDatabase()
+            
+            self.ChangeImageAx4(self.cross)
+            # self.currentImageAx3.set_visible(False)
+            
             self.currentNumber = self.NewCurrentNumber()
             self.signFrames = 0
 
@@ -255,7 +363,7 @@ class LeapAsl:
                 # print "predictedClass: " + str(predictedClass)
                 
             else: 
-                self.changeProgramState(0)
+                self.ChangeProgramState(0)
                 
             plt.pause(0.00001)
             
