@@ -19,7 +19,6 @@ class LeapAsl:
         self.currentNumber = self.NewCurrentNumber()
         self.correctSignFrames = 0
         self.signFrames = 0
-        self.signFrameLimit = 20
         
         matplotlib.interactive(True)
         self.fig = plt.figure(figsize = (8, 6))
@@ -59,6 +58,9 @@ class LeapAsl:
 
         self.currentImage = self.handWaveImage
         
+        self.UserLogin()
+    
+    def UserLogin(self): 
         # user login 
         self.userName = raw_input('Please enter your name: ')
         if (self.userName in self.database): 
@@ -67,15 +69,12 @@ class LeapAsl:
         else: 
             self.database[self.userName] = {'logins': 1}
             for i in range(0, 10):
-                signDbEntryName = "digit" + str(i) + "attempted"
-                self.database[self.userName][signDbEntryName] = 0
+                self.database[self.userName]["digit" + str(i) + "attempted"] = 0
+                self.database[self.userName]["digit" + str(i) + "answers"] = [0, 0, 0, 0, 0, 0] 
         
             print 'Welcome, ' + self.userName + ''
-
-        self.saveDatabase()
-        
         self.userRecord = self.database[self.userName]
-
+        self.saveDatabase()
     def saveDatabase(self):
         pickle.dump(self.database, open('userData/database.p', 'wb'))
 
@@ -88,7 +87,7 @@ class LeapAsl:
     def ChangeImage(self, newImg):
         self.currentImage.set_visible(False)
         newImg.set_visible(True)
-        currentImage = newImg
+        self.currentImage = newImg
 
     def CenterData(self, X): 
         # Center X coordinates
@@ -110,25 +109,25 @@ class LeapAsl:
 
     def DrawCurrentNumber(self):
         if self.currentNumber == 0: 
-            ChangeImage(self.zeroSign)
+            self.ChangeImage(self.zeroSign)
         if self.currentNumber == 1: 
-            ChangeImage(self.oneSign)
+            self.ChangeImage(self.oneSign)
         if self.currentNumber == 2: 
-            ChangeImage(self.twoSign)
+            self.ChangeImage(self.twoSign)
         if self.currentNumber == 3: 
-            ChangeImage(self.threeSign)
+            self.ChangeImage(self.threeSign)
         if self.currentNumber == 4: 
-            ChangeImage(self.fourSign)
+            self.ChangeImage(self.fourSign)
         if self.currentNumber == 5: 
-            ChangeImage(self.fiveSign)
+            self.ChangeImage(self.fiveSign)
         if self.currentNumber == 6: 
-            ChangeImage(self.sixSign)
+            self.ChangeImage(self.sixSign)
         if self.currentNumber == 7: 
-            ChangeImage(self.sevenSign)
+            self.ChangeImage(self.sevenSign)
         if self.currentNumber == 8: 
-            ChangeImage(self.eightSign)
+            self.ChangeImage(self.eightSign)
         if self.currentNumber == 9: 
-            ChangeImage(self.nineSign)
+            self.ChangeImage(self.nineSign)
             
     def HandOverDevice(self):
         return (len(self.frame.hands) > 0)
@@ -136,18 +135,18 @@ class LeapAsl:
     def HandCentered(self):
         if self.hand.sphere_center[0] > 100:
             # print "not centered"
-            ChangeImage(self.arrowLeft)
+            self.ChangeImage(self.arrowLeft)
             return False
         elif self.hand.sphere_center[0] < -100:
-            ChangeImage(self.arrowRight)
+            self.ChangeImage(self.arrowRight)
             # print "not centered"
             return False
         elif self.hand.sphere_center[2] > 100:
-            ChangeImage(self.arrowUp)
+            self.ChangeImage(self.arrowUp)
             # print "not centered"
             return False
         elif self.hand.sphere_center[2] < -100:
-            ChangeImage(self.arrowDown)
+            self.ChangeImage(self.arrowDown)
             # print "not centered"
             return False 
         else: 
@@ -170,48 +169,65 @@ class LeapAsl:
     def HandleState2(self):
         # print "Hand is present and centered"
         
-        if predictedClass == self.currentNumber: 
+        self.CycleSigns()
+        
+        if self.predictedClass == self.currentNumber: 
             self.correctSignFrames += 1
             if self.correctSignFrames >= 10: 
-                cself.currentNumber = NewCurrentNumber()
+                self.currentNumber = NewCurrentNumber()
                 changeProgramState(3) 
+                signAnswersDbEntryName = "digit" + str(currentNumber) + "answers"
+                self.database[self.userName][signAnswersDbEntryName].append(1) # signed digit correctly
         else: 
             self.correctSignFrames = 0
         
-        DrawCurrentNumber()  
+        self.DrawCurrentNumber()  
                     
     def HandleState3(self):
         # print "Correct!"
-        ChangeImage(self.checkmark)
-        changeProgramState(1)
-    
+        self.ChangeImage(self.checkmark)
+        self.changeProgramState(1)
+        
+    def SignFrameLimit(self, digit):
+        correctInLastFiveAttempts = 0 
+        for x in self.database[self.userName]["digit" + str(digit) + "answers"][-5:]: # signed digit correctly
+            if x == 1: 
+                correctInLastFiveAttempts += 1
+                
+        if correctInLastFiveAttempts == 0:        
+            return 20
+        else: 
+            return 20
+        
+    def CycleSigns(self):
+        print self.database[self.userName]
+        signFrameLimit = self.SignFrameLimit(self.currentNumber)
+        self.signFrames = self.signFrames + 1
+        if (self.signFrames == signFrameLimit):
+            signDbEntryName = "digit" + str(self.currentNumber) + "attempted"
+            self.database[self.userName][signDbEntryName] = self.database[self.userName][signDbEntryName] + 1
+            self.database[self.userName]["digit" + str(self.currentNumber) + "answers"].append(0) # failed to sign correctly
+            
+            self.saveDatabase()
+            self.currentNumber = self.NewCurrentNumber()
+            self.signFrames = 0
+
     def RunForever(self):
         while True:
-            print self.database[self.userName]
-            if (self.programState in [1,2]):
-                signFrames = signFrames + 1
-                if (signFrames == signFrameLimit):
-                    signDbEntryName = "digit" + str(currentNumber) + "attempted"
-                    
-                    self.database[userName][signDbEntryName] = self.database[userName][signDbEntryName] + 1
-                    saveDatabase()
-                    currentNumber = NewCurrentNumber()
-                    signFrames = 0
-                        
             self.frame = self.controller.frame()
             
             while (self.lines): 
-                ln = lines.pop()
+                ln = self.lines.pop()
                 ln.pop(0).remove()
                 del ln
                 ln = []
                 
             # if at least one hand is in the frame 
             if (self.HandOverDevice()):
-                hand = self.frame.hands[0]
+                self.hand = self.frame.hands[0]
                 k = 0
                 for i in range(0, 5): 
-                    finger = hand.fingers[i]
+                    finger = self.hand.fingers[i]
                     
                     for j in range(0, 4): 
                         bone = finger.bone(j)
@@ -225,7 +241,7 @@ class LeapAsl:
                         yTip = boneTip[1]
                         zTip = boneTip[2]
                         
-                        self.lines.append(ax.plot([-xBase, -xTip], [zBase, zTip], [yBase, yTip], 'r'))
+                        self.lines.append(self.ax.plot([-xBase, -xTip], [zBase, zTip], [yBase, yTip], 'r'))
                         
                         if ( (j == 0) | (j == 3)):
                             self.testData[0, k] = xTip
@@ -233,8 +249,8 @@ class LeapAsl:
                             self.testData[0, k + 2] = zTip
                             k = k + 3
                     
-                self.testData = self.CenterData(testData)
-                predictedClass = self.clf.predict(testData)
+                self.testData = self.CenterData(self.testData)
+                self.predictedClass = self.clf.predict(self.testData)
                 
                 # print "predictedClass: " + str(predictedClass)
                 
