@@ -37,6 +37,8 @@
 ehthumbs.db
 Thumbs.db
 
+venv
+
 Leap.py
 UnityAssets/
 libLeap.dylib
