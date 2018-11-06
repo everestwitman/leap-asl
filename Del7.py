@@ -107,15 +107,15 @@ class LeapAsl:
         # add spaced repetition?
         
         digitDistribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        for i in range(10):
+        for i in range(1):
             digitDistribution[i] = 5 - (self.CorrectLastFiveAttempts(i) - 1)
-        print digitDistribution
+        # print digitDistribution
         
         digitDistributionFlattened = []
         for i in range(len(digitDistribution)):
             for j in range(digitDistribution[i]):
                 digitDistributionFlattened.append(i)
-        print digitDistributionFlattened
+        # print digitDistributionFlattened
         
         return random.choice(digitDistributionFlattened)
 
@@ -156,7 +156,9 @@ class LeapAsl:
         return X
     
     def DisplaySign(self, digit):
-        return (self.CorrectLastFiveAttempts(digit) < 1)
+        a = self.CorrectLastFiveAttempts(digit) < 1
+        # print a
+        return a
 
     def DrawCurrentNumber(self):
         if self.currentNumber == 0: 
@@ -225,18 +227,18 @@ class LeapAsl:
     def HandCentered(self):
         if self.hand.sphere_center[0] > 100:
             # print "not centered"
-            self.ChangeImageAx2(self.arrowLeft)
+            self.ChangeImageAx4(self.arrowLeft)
             return False
         elif self.hand.sphere_center[0] < -100:
-            self.ChangeImageAx2(self.arrowRight)
+            self.ChangeImageAx4(self.arrowRight)
             # print "not centered"
             return False
         elif self.hand.sphere_center[2] > 100:
-            self.ChangeImageAx2(self.arrowUp)
+            self.ChangeImageAx4(self.arrowUp)
             # print "not centered"
             return False
         elif self.hand.sphere_center[2] < -100:
-            self.ChangeImageAx2(self.arrowDown)
+            self.ChangeImageAx4(self.arrowDown)
             # print "not centered"
             return False 
         else: 
@@ -248,10 +250,11 @@ class LeapAsl:
             
         # print "Waiting for hand"
         
-        self.ChangeImageAx2(self.handWaveImage)
+        self.ChangeImageAx4(self.handWaveImage)
         
         
     def HandleState1(self):
+        self.CycleSigns()
         if self.HandCentered(): 
             self.ChangeProgramState(2)
             
@@ -303,8 +306,9 @@ class LeapAsl:
         
         
     def CycleSigns(self):
-        print self.database[self.userName]
+        # print self.database[self.userName]
         signFrameLimit = self.SignFrameLimit(self.currentNumber)
+        print signFrameLimit, self.currentNumber
         self.signFrames = self.signFrames + 1
         
         if (self.signFrames == signFrameLimit):
