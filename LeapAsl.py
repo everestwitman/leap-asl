@@ -17,34 +17,34 @@ class LeapAsl:
         self.testData = np.zeros((1, 30), dtype='f')
 
         self.programState = 0
-        
-        self.currentDigitSequenceLength = 2
-        self.NewCurrentDigitSequence()
-        
         self.correctSignFrames = 0
         self.signFrames = 0
         
         matplotlib.interactive(True)
-        self.fig = plt.figure(figsize = (12, 8))
+        self.fig = plt.figure(figsize = (10, 10))
 
         self.controller = Controller()
         self.lines = []
         
-        self.ax = self.fig.add_subplot(111, projection='3d')
+        self.ax = self.fig.add_subplot(221, projection='3d')
         self.ax.set_xlim(-300, 300)
         self.ax.set_ylim(-50, 250)
         self.ax.set_zlim(50, 500)
         self.ax.view_init(azim=90)
-
-        self.ax2 = self.fig.add_subplot(6,6,1)
-        self.ax2.axis('off') # clear x- and y-axes
-        self.ax3 = self.fig.add_subplot(6,6,2)
-        self.ax3.axis('off') # clear x- and y-axes
-        self.ax4 = self.fig.add_subplot(6,6,3)
-        self.ax4.axis('off') # clear x- and y-axes
-        self.ax5 = self.fig.add_subplot(6,6,4)
-        self.ax5.axis('off') # clear x- and y-axes
         
+        self.ax2 = self.fig.add_subplot(223)
+        self.ax2.axis('off') # clear x- and y-axes
+        
+        self.ax3 = self.fig.add_subplot(224)
+        self.ax3.axis('off') # clear x- and y-axes
+        self.currentDigitSequenceText = plt.text(-0.2, -0.2, "", fontsize=60)
+        
+        self.ax4 = self.fig.add_subplot(222)
+        self.ax4.axis('off') # clear x- and y-axes
+        
+        self.currentDigitSequenceLength = 2
+        self.NewCurrentDigitSequence()
+    
         self.LoadImages()
         
     def LoadImages(self):
@@ -54,11 +54,11 @@ class LeapAsl:
         self.checkmark = self.ax4.imshow(plt.imread("images/checkmark.png"), extent=extent, visible=False)
         self.cross = self.ax4.imshow(plt.imread("images/cross.png"), extent=extent, visible=False)
         
-        self.arrowLeft = self.ax5.imshow(plt.imread("images/arrow_left.png"), extent=extent, visible=True)
-        self.arrowUp = self.ax5.imshow(plt.imread("images/arrow_up.png"), extent=extent, visible=False)
-        self.arrowDown = self.ax5.imshow(plt.imread("images/arrow_down.png"), extent=extent, visible=False)
-        self.arrowRight = self.ax5.imshow(plt.imread("images/arrow_right.png"), extent=extent, visible=False)  
-        self.handWaveImage = self.ax5.imshow(plt.imread("images/handWaveImage.png"), extent=extent, visible=False)  
+        # self.arrowLeft = self.ax4.imshow(plt.imread("images/arrow_left.png"), extent=extent, visible=True)
+        # self.arrowUp = self.ax4.imshow(plt.imread("images/arrow_up.png"), extent=extent, visible=False)
+        # self.arrowDown = self.ax4.imshow(plt.imread("images/arrow_down.png"), extent=extent, visible=False)
+        # self.arrowRight = self.ax4.imshow(plt.imread("images/arrow_right.png"), extent=extent, visible=False)  
+        self.handWaveImage = self.ax4.imshow(plt.imread("images/handWaveImage2.png"), extent=extent, visible=False)  
         
         self.zeroDigit = self.ax3.imshow(plt.imread("images/zero.png"), extent=extent, visible=False)
         self.oneDigit = self.ax3.imshow(plt.imread("images/one.png"), extent=extent, visible=False)
@@ -106,8 +106,7 @@ class LeapAsl:
         pickle.dump(self.database, open('userData/database.p', 'wb'))
 
     def NewCurrentNumber(self): 
-        # By ratio right for digit, min one
-        # add spaced repetition?
+        # By proportion of correct answers for digit, with minimum of one
         
         digitDistribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for i in range(10):
@@ -134,7 +133,10 @@ class LeapAsl:
         for x in range(self.currentDigitSequenceLength):
             self.currentDigitSequence.append(self.NewCurrentNumber())
             
+        
+        self.currentDigitSequenceText.set_text(str(self.currentDigitSequence).strip('[]'))
         self.currentNumber = self.currentDigitSequence[self.currentDigitIndex]
+        
         
     def ChangeProgramState(self, newState):
         self.programState = newState
@@ -242,18 +244,18 @@ class LeapAsl:
     def HandCentered(self):
         if self.hand.sphere_center[0] > 100:
             # print "not centered"
-            self.ChangeImageAx2(self.arrowLeft)
+            # self.ChangeImageAx2(self.arrowLeft)
             return False
         elif self.hand.sphere_center[0] < -100:
-            self.ChangeImageAx2(self.arrowRight)
+            # self.ChangeImageAx2(self.arrowRight)
             # print "not centered"
             return False
         elif self.hand.sphere_center[2] > 100:
-            self.ChangeImageAx2(self.arrowUp)
+            # self.ChangeImageAx2(self.arrowUp)
             # print "not centered"
             return False
         elif self.hand.sphere_center[2] < -100:
-            self.ChangeImageAx2(self.arrowDown)
+            # self.ChangeImageAx2(self.arrowDown)
             # print "not centered"
             return False 
         else: 
@@ -372,6 +374,7 @@ class LeapAsl:
             self.correctSignFrames = 0
 
     def RunForever(self):
+        # If one second has elapsed, then do x
         while True:
             print str(self.currentDigitSequence).strip('[]')
             self.frame = self.controller.frame()
@@ -437,9 +440,3 @@ class LeapAsl:
 
 leapAsl = LeapAsl()
 leapAsl.RunForever()
-
-
-
-    
-    
-    
