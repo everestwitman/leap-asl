@@ -122,7 +122,7 @@ class LeapAsl:
         return random.choice(digitDistributionFlattened)
 
     def NewCurrentDigitSequence(self):
-        if self.LastAggregateAttempt() == 1: 
+        if self.LastAggregateAttempt() == 1 and self.currentDigitSequenceLength < 5: 
             self.currentDigitSequenceLength = self.currentDigitSequenceLength + 1
         elif self.currentDigitSequenceLength > 1: 
             self.currentDigitSequenceLength = self.currentDigitSequenceLength - 1
@@ -131,12 +131,15 @@ class LeapAsl:
         
         self.currentDigitSequence = []
         for x in range(self.currentDigitSequenceLength):
-            self.currentDigitSequence.append(self.NewCurrentNumber())
+            newCurrentNumber = self.NewCurrentNumber()
+            if newCurrentNumber in self.currentDigitSequence:
+                newCurrentNumber = self.NewCurrentNumber()
+                
+            self.currentDigitSequence.append(newCurrentNumber)
             
         
         self.currentDigitSequenceText.set_text(str(self.currentDigitSequence).strip('[]'))
-        self.currentNumber = self.currentDigitSequence[self.currentDigitIndex]
-        
+        self.currentNumber = self.currentDigitSequence[self.currentDigitIndex]    
         
     def ChangeProgramState(self, newState):
         self.programState = newState
@@ -359,8 +362,6 @@ class LeapAsl:
                 self.database[self.userName][signDbEntryName] = self.database[self.userName][signDbEntryName] + 1 #increment digits attempts count
                 self.database[self.userName][signAnswersDbEntryName].append(1) # signed digit correctly
                 self.database[self.userName]["aggregateAnswers"].append(1) # signed digit correctly
-                
-                
                 
                 if self.currentDigitIndex < len(self.currentDigitSequence) - 1: # iterate through digit sequence
                     self.currentDigitIndex = self.currentDigitIndex + 1
