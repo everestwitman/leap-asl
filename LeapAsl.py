@@ -21,7 +21,7 @@ class LeapAsl:
         self.signFrames = 0
         
         matplotlib.interactive(True)
-        self.fig = plt.figure(figsize = (10, 10))
+        self.fig = plt.figure(figsize = (9, 9))
 
         self.controller = Controller()
         self.lines = []
@@ -53,11 +53,7 @@ class LeapAsl:
         # Draw all images as invisible
         self.checkmark = self.ax4.imshow(plt.imread("images/checkmark.png"), extent=extent, visible=False)
         self.cross = self.ax4.imshow(plt.imread("images/cross.png"), extent=extent, visible=False)
-        
-        # self.arrowLeft = self.ax4.imshow(plt.imread("images/arrow_left.png"), extent=extent, visible=True)
-        # self.arrowUp = self.ax4.imshow(plt.imread("images/arrow_up.png"), extent=extent, visible=False)
-        # self.arrowDown = self.ax4.imshow(plt.imread("images/arrow_down.png"), extent=extent, visible=False)
-        # self.arrowRight = self.ax4.imshow(plt.imread("images/arrow_right.png"), extent=extent, visible=False)  
+
         self.handWaveImage = self.ax4.imshow(plt.imread("images/handWaveImage2.png"), extent=extent, visible=False)  
         
         self.zeroDigit = self.ax3.imshow(plt.imread("images/zero.png"), extent=extent, visible=False)
@@ -111,13 +107,11 @@ class LeapAsl:
         digitDistribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for i in range(10):
             digitDistribution[i] = 5 - (self.CorrectLastFiveAttempts(i) - 1)
-        # print digitDistribution
         
         digitDistributionFlattened = []
         for i in range(len(digitDistribution)):
             for j in range(digitDistribution[i]):
                 digitDistributionFlattened.append(i)
-        # print digitDistributionFlattened
         
         return random.choice(digitDistributionFlattened)
 
@@ -133,10 +127,11 @@ class LeapAsl:
         for x in range(self.currentDigitSequenceLength):
             newCurrentNumber = self.NewCurrentNumber()
             if newCurrentNumber in self.currentDigitSequence:
+                print newCurrentNumber
+                print self.currentDigitSequence
                 newCurrentNumber = self.NewCurrentNumber()
                 
-            self.currentDigitSequence.append(newCurrentNumber)
-            
+            self.currentDigitSequence.append(newCurrentNumber)    
         
         self.currentDigitSequenceText.set_text(str(self.currentDigitSequence).strip('[]'))
         self.currentNumber = self.currentDigitSequence[self.currentDigitIndex]    
@@ -246,50 +241,39 @@ class LeapAsl:
 
     def HandCentered(self):
         if self.hand.sphere_center[0] > 100:
-            # print "not centered"
-            # self.ChangeImageAx2(self.arrowLeft)
             return False
         elif self.hand.sphere_center[0] < -100:
-            # self.ChangeImageAx2(self.arrowRight)
-            # print "not centered"
             return False
         elif self.hand.sphere_center[2] > 100:
-            # self.ChangeImageAx2(self.arrowUp)
-            # print "not centered"
             return False
         elif self.hand.sphere_center[2] < -100:
-            # self.ChangeImageAx2(self.arrowDown)
-            # print "not centered"
             return False 
         else: 
             return True 
         
     def HandleState0(self): 
+        # Waiting for hand
         if self.HandOverDevice():
             self.ChangeProgramState(1)
-            
-        # print "Waiting for hand"
         
         self.ChangeImageAx2(self.handWaveImage)
         
         
     def HandleState1(self):
+        # Hand is present BUT NOT centered"
         if self.HandCentered(): 
             self.ChangeProgramState(2)
-            
-        # print "Hand is present BUT NOT centered"
         
     def HandleState2(self):
-        # print "Hand is present and centered"
+        # Hand is present and centered
         self.SignedCorrectly()
         
         self.DrawCurrentNumber()  
         self.SaveDatabase()
                     
     def HandleState3(self):
-        # print "Correct!"
+        # Correct!
         self.ChangeImageAx4(self.checkmark)
-        # self.currentImageAx3.set_visible(False)
         
         self.ChangeProgramState(1)
     
@@ -333,7 +317,6 @@ class LeapAsl:
             return 100 
     
     def SignedCorrectly(self):
-        # print self.database[self.userName]
         signFrameLimit = self.SignFrameLimit(self.currentNumber)
         self.signFrames = self.signFrames + 1
         
@@ -347,7 +330,6 @@ class LeapAsl:
             self.SaveDatabase()
             
             self.ChangeImageAx4(self.cross)
-            # self.currentImageAx3.set_visible(False)
             
             self.NewCurrentDigitSequence()
             
@@ -377,7 +359,6 @@ class LeapAsl:
     def RunForever(self):
         # If one second has elapsed, then do x
         while True:
-            print str(self.currentDigitSequence).strip('[]')
             self.frame = self.controller.frame()
             
             while (self.lines): 
@@ -416,15 +397,10 @@ class LeapAsl:
                 self.testData = self.CenterData(self.testData)
                 self.predictedClass = self.clf.predict(self.testData)
                 
-                # print "predictedClass: " + str(predictedClass)
-                
             else: 
                 self.ChangeProgramState(0)
                 
             plt.pause(0.00001)
-            
-            # print ("State: " + str(programState))
-            # print ("currentNumber: " + str(currentNumber))
             
             if (self.programState == 0): # waiting for hand
                 self.HandleState0()
