@@ -109,7 +109,7 @@ class LeapAsl:
         # By proportion of correct answers for digit, with minimum of one
         
         digitDistribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        for i in range(1):
+        for i in range(10):
             digitDistribution[i] = 5 - (self.CorrectLastFiveAttempts(i) - 1)
         # print digitDistribution
         
@@ -178,9 +178,7 @@ class LeapAsl:
         return X
     
     def DisplaySign(self, digit):
-        a = self.CorrectLastFiveAttempts(digit) < 1
-        # print a
-        return a
+        return (self.CorrectLastFiveAttempts(digit) < 1)
 
     def DrawCurrentNumber(self):
         if self.currentNumber == 0: 
@@ -249,20 +247,6 @@ class LeapAsl:
     def HandCentered(self):
         if self.hand.sphere_center[0] > 100:
             # print "not centered"
-<<<<<<< HEAD:Del7.py
-            self.ChangeImageAx4(self.arrowLeft)
-            return False
-        elif self.hand.sphere_center[0] < -100:
-            self.ChangeImageAx4(self.arrowRight)
-            # print "not centered"
-            return False
-        elif self.hand.sphere_center[2] > 100:
-            self.ChangeImageAx4(self.arrowUp)
-            # print "not centered"
-            return False
-        elif self.hand.sphere_center[2] < -100:
-            self.ChangeImageAx4(self.arrowDown)
-=======
             # self.ChangeImageAx2(self.arrowLeft)
             return False
         elif self.hand.sphere_center[0] < -100:
@@ -275,7 +259,6 @@ class LeapAsl:
             return False
         elif self.hand.sphere_center[2] < -100:
             # self.ChangeImageAx2(self.arrowDown)
->>>>>>> tmp:LeapAsl.py
             # print "not centered"
             return False 
         else: 
@@ -287,11 +270,10 @@ class LeapAsl:
             
         # print "Waiting for hand"
         
-        self.ChangeImageAx4(self.handWaveImage)
+        self.ChangeImageAx2(self.handWaveImage)
         
         
     def HandleState1(self):
-        self.CycleSigns()
         if self.HandCentered(): 
             self.ChangeProgramState(2)
             
@@ -349,17 +331,10 @@ class LeapAsl:
             return (100 - 10 * correctLastFiveAttempts)  
         else: 
             return 100 
-<<<<<<< HEAD:Del7.py
-        
-        
-    def CycleSigns(self):
-=======
     
     def SignedCorrectly(self):
->>>>>>> tmp:LeapAsl.py
         # print self.database[self.userName]
         signFrameLimit = self.SignFrameLimit(self.currentNumber)
-        print signFrameLimit, self.currentNumber
         self.signFrames = self.signFrames + 1
         
         # Failed to correctly sign current digit 
